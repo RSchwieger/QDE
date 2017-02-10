@@ -2,13 +2,16 @@ from PyBoolNet import InteractionGraphs as IGs
 from PyBoolNet import QuineMcCluskey as QMC
 from PyBoolNet import StateTransitionGraphs as STGs
 
+import networkx as nx
+import matplotlib.pyplot as plt
+
 from ConnectingQDEWithBoolean import alternative_phi as phi
-from Examples import example5 as example
-from proposition2 import is_there_an_edge_between
+from Examples import example3 as example
+from proposition2 import is_there_an_edge_between, construct_qde_graph, save_plot_of_qde_graph
 from sign_algebra import *
 from copy import deepcopy
 
-example_filename = example.return_name()
+example_filename = "./Examples/"+example.return_name()
 
 def binary_string_to_components(binary_string):
     """
@@ -90,6 +93,32 @@ def interaction_graph_has_self_loops(interaction_graph):
             return True
     return False
 
+def computeQuotientGraph(graph, function):
+    """
+    Computes the quotient graph: graph/function
+    :param graph: usual graph
+    :param function: a function from the nodes somewhere
+    :return: The quotient graph. The labels are the values of f
+    """
+    # Create a partition for the nodes based on f
+    partition = {}
+    for node in graph.nodes():
+        node_converted = [int(bit) for bit in node]
+        key = tuple(function(node_converted))
+        if key not in partition:
+            partition[key] = []
+        partition[key] += [node]
+    labels_list = list(partition.keys())
+    partition = list(partition.values())
+    condensation = nx.condensation(graph, partition)
+
+    # Assign the correct labels
+    labels = {}
+    for node, label in zip(condensation.nodes(), labels_list):
+        labels[node] = label
+    return nx.relabel_nodes(condensation, labels)
+
+
 def spit_out_graphs(variable_to_boolean_function, prefix_of_filename, boolean_functions_as_list,
                     show_only_if_difference_between_stg_and_reduced_stg = False):
     prime_implicants = QMC.functions2primes(variable_to_boolean_function)
@@ -116,11 +145,22 @@ def spit_out_graphs(variable_to_boolean_function, prefix_of_filename, boolean_fu
     # Construct the state transition graph
     state_transition_graph = STGs.primes2stg(prime_implicants, "asynchronous")
 
+    #Get the quotient graph and plot it
+    quotientGraph = computeQuotientGraph(state_transition_graph, example.f)
+    nx.draw(quotientGraph, with_labels=True, node_size=2500)
+    plt.draw()
+    #plt.show()
+    plt.savefig(prefix_of_filename+"quotient_graph.png")
+    plt.close()
+
+
     # Convert the igraph into an adajacency matrix
     sign_matrix, number_to_nodes, nodes_to_number = graph_to_adj_matrix(igraph)
-    #print("The sign_matrix of f is:\n"+str(sign_matrix))
-    #print("number to nodes are \n" + str(number_to_nodes))
-    #print("nodes to number are \n"+str(nodes_to_number))
+
+    # Get the QDE graph
+    print("Warning: Currently the QDE graph is only correct if there are no negative diagonal elements.")
+    qde_graph = construct_qde_graph(sign_matrix)
+    save_plot_of_qde_graph(qde_graph, prefix_of_filename + "_complete_qde_graph.png")
 
     sign_matrix = substract_identity(sign_matrix) # We want the sign matrix of f-id
     #print("The sign_matrix of f-id is:\n"+str(sign_matrix))
