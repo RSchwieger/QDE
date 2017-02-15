@@ -6,8 +6,11 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 from ConnectingQDEWithBoolean import alternative_phi as phi
-from Examples import example3 as example
-from proposition2 import is_there_an_edge_between, construct_qde_graph, save_plot_of_qde_graph
+
+# Replace example here
+from Examples import example1 as example
+
+from proposition2 import is_there_an_edge_between, construct_qde_graph, save_plot_of_qde_graph, create_scc_graph
 from sign_algebra import *
 from copy import deepcopy
 
@@ -93,6 +96,9 @@ def interaction_graph_has_self_loops(interaction_graph):
             return True
     return False
 
+def invert_dict(d):
+    return dict([(frozenset(d[k]), k) for k in d.keys()])
+
 def computeQuotientGraph(graph, function):
     """
     Computes the quotient graph: graph/function
@@ -100,6 +106,7 @@ def computeQuotientGraph(graph, function):
     :param function: a function from the nodes somewhere
     :return: The quotient graph. The labels are the values of f
     """
+
     # Create a partition for the nodes based on f
     partition = {}
     for node in graph.nodes():
@@ -108,16 +115,16 @@ def computeQuotientGraph(graph, function):
         if key not in partition:
             partition[key] = []
         partition[key] += [node]
-    labels_list = list(partition.keys())
-    partition = list(partition.values())
-    condensation = nx.condensation(graph, partition)
 
-    # Assign the correct labels
-    labels = {}
-    for node, label in zip(condensation.nodes(), labels_list):
-        labels[node] = label
-    return nx.relabel_nodes(condensation, labels)
-
+    def relation(s,t):
+        s = [int(bit) for bit in s]
+        t = [int(bit) for bit in t]
+        for fs,ft in zip(function(s), function(t)):
+            if fs != ft:
+                return False
+        return True
+    quotient_graph = nx.quotient_graph(graph, relation)
+    return nx.relabel_nodes(quotient_graph, invert_dict(partition))
 
 def spit_out_graphs(variable_to_boolean_function, prefix_of_filename, boolean_functions_as_list,
                     show_only_if_difference_between_stg_and_reduced_stg = False):
@@ -158,9 +165,15 @@ def spit_out_graphs(variable_to_boolean_function, prefix_of_filename, boolean_fu
     sign_matrix, number_to_nodes, nodes_to_number = graph_to_adj_matrix(igraph)
 
     # Get the QDE graph
-    print("Warning: Currently the QDE graph is only correct if there are no negative diagonal elements.")
+    print("\nWarning: Currently the QDE graph is only correct if there are no negative diagonal elements.")
     qde_graph = construct_qde_graph(sign_matrix)
     save_plot_of_qde_graph(qde_graph, prefix_of_filename + "_complete_qde_graph.png")
+
+    # Get the scc-graph of the QDE-graph
+    scc_qde_graph, names_of_components = create_scc_graph(qde_graph)
+    save_plot_of_qde_graph(scc_qde_graph, prefix_of_filename + "_complete_scc_qde_graph.png")
+    print("\n"+prefix_of_filename + "_complete_scc_qde_graph.png created with components \n"+str(names_of_components))
+    print("\n")
 
     sign_matrix = substract_identity(sign_matrix) # We want the sign matrix of f-id
     #print("The sign_matrix of f-id is:\n"+str(sign_matrix))

@@ -6,7 +6,7 @@ from sign_algebra import *
 
 # Constants:
 
-k = [4,4,4] # Hill coefficients
+k = [12,12,12] # Hill coefficients
 theta = [0.5, 0.5, 0.5] # thresholds
 d = [1,1,1] # diagonal of D-Matrix
 x0 = [0.75,0.75,0.75] # initial value (1,*,*)
@@ -21,7 +21,7 @@ def multivariateInterpolation(x):
     """
     y = [0,0,0]
     y[0] = (1-x[2])+x[1]-(1-x[2])*x[1] #(1-x3)+x2-(1-x3)*x2
-    y[1] = x[0]*(1-x[1])
+    y[1] = x[0]*(1-x[2])
     y[2] = x[1]
     return y
 

@@ -63,13 +63,22 @@ def save_plot_of_qde_graph(qde_graph, filename):
     #nx.draw(qde_grap, with_labels=True)
     node_labels = {node: node for node in qde_graph.nodes()}
     nx.draw(qde_graph, pos=nx.spring_layout(qde_graph), node_size=2500, with_labels=True)
+    nx.drawing.nx_pydot.write_dot(qde_graph, filename.replace(".png", ".dot"))
+    #nx.write_dot(qde_graph, filename+'.dot')
     #nx.draw_networkx_labels(qde_graph, pos=nx.spring_layout(qde_graph), labels=node_labels)
     plt.draw()
     plt.savefig(filename)
     plt.close()
 
+def create_scc_graph(graph):
+    sccs = nx.strongly_connected_components(graph)
+    condensation = nx.condensation(graph, sccs)
+    return condensation, condensation.graph['mapping']
+
 
 if __name__ == "__main__":
     sign_matrix = [[n, p, m], [m, n, m], [m, n, n]]
     qde_graph = construct_qde_graph(sign_matrix)
+    scc_graph = create_scc_graph(qde_graph)
     save_plot_of_qde_graph(qde_graph, "test.png")
+    save_plot_of_qde_graph(scc_graph, "test2.png")
