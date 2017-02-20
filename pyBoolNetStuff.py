@@ -5,16 +5,27 @@ from PyBoolNet import StateTransitionGraphs as STGs
 import networkx as nx
 import matplotlib.pyplot as plt
 
-from ConnectingQDEWithBoolean import alternative_phi as phi
-
 # Replace example here
-from Examples import example1 as example
+from Examples import cytokinin_A_p as example
 
 from proposition2 import is_there_an_edge_between, construct_qde_graph, save_plot_of_qde_graph, create_scc_graph
 from sign_algebra import *
 from copy import deepcopy
 
 example_filename = "./Examples/"+example.return_name()
+
+def phi(x, f):
+    y = f(x)
+    ret = [y[i] - x[i] for i in range(len(x))]
+    rret = []
+    for i in range(len(ret)):
+        if ret[i] != 0:
+            rret += [ phi.value_to_sign[ret[i]] ]
+        else:
+            temp = (-1)**(1-x[i])
+            rret += [ phi.value_to_sign[temp] ]
+    return rret
+phi.value_to_sign = {1: p, -1: m}
 
 def binary_string_to_components(binary_string):
     """
@@ -124,6 +135,7 @@ def computeQuotientGraph(graph, function):
                 return False
         return True
     quotient_graph = nx.quotient_graph(graph, relation)
+    print("partition:\n"+str(invert_dict(partition)))
     return nx.relabel_nodes(quotient_graph, invert_dict(partition))
 
 def spit_out_graphs(variable_to_boolean_function, prefix_of_filename, boolean_functions_as_list,

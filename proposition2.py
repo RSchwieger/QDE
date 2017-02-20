@@ -6,6 +6,16 @@ from itertools import product
 import networkx as nx
 import matplotlib.pyplot as plt
 
+"""
+This is an implementation of proposition 2 in
+
+"Klaus Eisenack. Model ensembles for natural resource management: Extensions of qualitative
+differential equations using graph theory and viability theory. doctoral thesis,
+Free University Berlin, Germany, 2008"
+
+With this proposition the so called QDE-graph of a monotonic ensemble can be constructed.
+"""
+
 def is_there_an_edge_between(v, w, sigma):
     """
     Tests whether there is an edge in the state transition graph of an QDE with sign matrix
@@ -15,9 +25,8 @@ def is_there_an_edge_between(v, w, sigma):
     :param sigma: sign matrix
     :return: True for yes, False for no
     """
-    x = v.wedge(w) # find out which components change
+    x = v.wedge(w) # find out which components change (see notation in source of prop. 2)
     for i in x.support_complement():
-        #print(i)
         for j in x.support(): # iterate over all components of v which don't change during the transition v -> w
             if w[i]*x[j] == sigma[i][j]:
                 return True
@@ -25,9 +34,9 @@ def is_there_an_edge_between(v, w, sigma):
 
 def get_edges(sign_matrix):
     """
-    Returns a list of edges
+    Returns the edges of the QDE graph with given sign matrix
     :param sign_matrix:
-    :return:
+    :return: edges of the QDE graph
     """
     edges = []
     length = len(sign_matrix)
@@ -40,7 +49,13 @@ def get_edges(sign_matrix):
     return edges
 
 def convert_edge(edge):
-    sign_dict = {str(m): 0, str(p):1}
+    """
+    Converts the edge in the QDE graph to an edge between nodes in {0,1}^N, This function
+    is only for internal usage.
+    :param edge: edge in QDE graph
+    :return: edge in G/f
+    """
+    sign_dict = {str(m): 0, str(p):1} # convert minus to 0, plus to 1
     vertex1 = [sign_dict[str(s)] for s in edge[0]]
     vertex2 = [sign_dict[str(s)] for s in edge[1]]
     return (vertex1, vertex2)
@@ -49,7 +64,7 @@ def construct_qde_graph(sign_matrix, zero_one_representation=True):
     """
     Constructs a QDE-graph
     :param sign_matrix:
-    :return:
+    :return: qde graph
     """
     qde_graph = nx.DiGraph()
     edges = get_edges(sign_matrix)
@@ -60,8 +75,13 @@ def construct_qde_graph(sign_matrix, zero_one_representation=True):
     return qde_graph
 
 def save_plot_of_qde_graph(qde_graph, filename):
-    #nx.draw(qde_grap, with_labels=True)
-    node_labels = {node: node for node in qde_graph.nodes()}
+    """
+    Saves the given qde graph to an png file in filename
+    :param qde_graph:
+    :param filename:
+    :return:
+    """
+    # node_labels = {node: node for node in qde_graph.nodes()}
     nx.draw(qde_graph, pos=nx.spring_layout(qde_graph), node_size=2500, with_labels=True)
     nx.drawing.nx_pydot.write_dot(qde_graph, filename.replace(".png", ".dot"))
     #nx.write_dot(qde_graph, filename+'.dot')
@@ -71,6 +91,11 @@ def save_plot_of_qde_graph(qde_graph, filename):
     plt.close()
 
 def create_scc_graph(graph):
+    """
+    Create the graph of strongly connected components.
+    :param graph:
+    :return: scc graph
+    """
     sccs = nx.strongly_connected_components(graph)
     condensation = nx.condensation(graph, sccs)
     return condensation, condensation.graph['mapping']
