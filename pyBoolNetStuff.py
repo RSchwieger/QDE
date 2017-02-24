@@ -6,7 +6,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 # Replace example here
-from Examples import cytokinin_A_p as example
+from Examples import example7 as example
 
 from proposition2 import is_there_an_edge_between, construct_qde_graph, save_plot_of_qde_graph, create_scc_graph
 from sign_algebra import *
@@ -122,7 +122,7 @@ def computeQuotientGraph(graph, function):
     partition = {}
     for node in graph.nodes():
         node_converted = [int(bit) for bit in node]
-        key = tuple(function(node_converted))
+        key = str(tuple(function(node_converted)))
         if key not in partition:
             partition[key] = []
         partition[key] += [node]
@@ -152,37 +152,33 @@ def spit_out_graphs(variable_to_boolean_function, prefix_of_filename, boolean_fu
         return
     else:
         pass
-        #print("The function is monotonous.")
 
     # Only consider interaction graphs wihtout self loops
-    #if interaction_graph_has_self_loops(igraph):
-        #print("Skip this graph since it has a self loop.")
-    #    return
-    #else:
-    #    print("Interacion graph has no self loops")
+    if interaction_graph_has_self_loops(igraph):
+        print("Skip this graph since it has a self loop.")
+        return
 
     # Construct the state transition graph
     state_transition_graph = STGs.primes2stg(prime_implicants, "asynchronous")
 
     #Get the quotient graph and plot it
     quotientGraph = computeQuotientGraph(state_transition_graph, example.f)
-    nx.draw(quotientGraph, with_labels=True, node_size=2500)
-    plt.draw()
-    #plt.show()
-    plt.savefig(prefix_of_filename+"quotient_graph.png")
-    plt.close()
-
+    STGs.stg2image(quotientGraph, prefix_of_filename+"quotient_graph.png", LayoutEngine="dot")
 
     # Convert the igraph into an adajacency matrix
     sign_matrix, number_to_nodes, nodes_to_number = graph_to_adj_matrix(igraph)
 
     # Get the QDE graph
     print("\nWarning: Currently the QDE graph is only correct if there are no negative diagonal elements.")
-    qde_graph = construct_qde_graph(sign_matrix)
-    save_plot_of_qde_graph(qde_graph, prefix_of_filename + "_complete_qde_graph.png")
+    qde_graph = construct_qde_graph(sign_matrix, zero_one_representation=False)
+    discrete_qde_graph = construct_qde_graph(sign_matrix, zero_one_representation=True)
+    STGs.stg2image(qde_graph, prefix_of_filename + "_complete_qde_graph.png", LayoutEngine="dot")
+    STGs.stg2image(discrete_qde_graph, prefix_of_filename + "_complete_discrete_qde_graph.png", LayoutEngine="dot")
+    #save_plot_of_qde_graph(qde_graph, prefix_of_filename + "_complete_qde_graph.png")
 
     # Get the scc-graph of the QDE-graph
     scc_qde_graph, names_of_components = create_scc_graph(qde_graph)
+    #STGs.stg2image(scc_qde_graph, prefix_of_filename + "_complete_scc_qde_graph.png")
     save_plot_of_qde_graph(scc_qde_graph, prefix_of_filename + "_complete_scc_qde_graph.png")
     print("\n"+prefix_of_filename + "_complete_scc_qde_graph.png created with components \n"+str(names_of_components))
     print("\n")
@@ -193,12 +189,12 @@ def spit_out_graphs(variable_to_boolean_function, prefix_of_filename, boolean_fu
                                                                       boolean_functions_as_list)
     if show_only_if_difference_between_stg_and_reduced_stg:
         if edge_deleted:
-            STGs.stg2image(state_transition_graph, prefix_of_filename + "_stg.png")
-            STGs.stg2image(reduced_state_transition_graph, prefix_of_filename + "_stg_smaller.png")
+            STGs.stg2image(state_transition_graph, prefix_of_filename + "_stg.png", LayoutEngine="dot")
+            STGs.stg2image(reduced_state_transition_graph, prefix_of_filename + "_stg_smaller.png", LayoutEngine="dot")
             IGs.create_image(prime_implicants, prefix_of_filename + "_igraph.png")
     else:
-        STGs.stg2image(state_transition_graph, prefix_of_filename + "_stg.png")
-        STGs.stg2image(reduced_state_transition_graph, prefix_of_filename+"_stg_smaller.png")
+        STGs.stg2image(state_transition_graph, prefix_of_filename + "_stg.png", LayoutEngine="dot")
+        STGs.stg2image(reduced_state_transition_graph, prefix_of_filename+"_stg_smaller.png", LayoutEngine="dot")
         IGs.create_image(prime_implicants, prefix_of_filename+"_igraph.png")
 
     return edge_deleted

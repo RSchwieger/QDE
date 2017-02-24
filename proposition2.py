@@ -27,10 +27,15 @@ def is_there_an_edge_between(v, w, sigma):
     """
     x = v.wedge(w) # find out which components change (see notation in source of prop. 2)
     for i in x.support_complement():
+        line_i_ok = False
+        # check if line i satisfies the conditions of the theorem
         for j in x.support(): # iterate over all components of v which don't change during the transition v -> w
             if w[i]*x[j] == sigma[i][j]:
-                return True
-        return False
+                line_i_ok = True
+                break
+        if not line_i_ok:
+            return False
+    return True
 
 def get_edges(sign_matrix):
     """

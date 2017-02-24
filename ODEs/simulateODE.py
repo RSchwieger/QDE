@@ -1,7 +1,7 @@
 from scipy.integrate import ode
 import matplotlib.pyplot as plt
 from sign_algebra import *
-from ODEs import application1 as application
+from ODEs import examplePresentation as application
 
 f = application.f
 x0 = application.x0
