@@ -60,7 +60,7 @@ def convert_edge(edge):
     :param edge: edge in QDE graph
     :return: edge in G/f
     """
-    sign_dict = {str(m): 0, str(p):1} # convert minus to 0, plus to 1
+    sign_dict = {str(m):0, str(p):1} # convert minus to 0, plus to 1
     vertex1 = [sign_dict[str(s)] for s in edge[0]]
     vertex2 = [sign_dict[str(s)] for s in edge[1]]
     return (vertex1, vertex2)
@@ -75,6 +75,7 @@ def construct_qde_graph(sign_matrix, zero_one_representation=True):
     edges = get_edges(sign_matrix)
     for edge in edges:
         if zero_one_representation:
+            print(str(edge)+" ---> "+str((str(convert_edge(edge)[0]), str(convert_edge(edge)[1]))))
             edge = convert_edge(edge)
         qde_graph.add_edge(str(edge[0]), str(edge[1]))
     return qde_graph
