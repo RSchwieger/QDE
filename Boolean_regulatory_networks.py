@@ -1,16 +1,20 @@
+"""
+This module contains the code for the running example. Add further Boolean functions
+in the folder "Examples" to try other examples.
+"""
+
+
 from PyBoolNet import InteractionGraphs as IGs
 from PyBoolNet import QuineMcCluskey as QMC
 from PyBoolNet import StateTransitionGraphs as STGs
 
 import networkx as nx
 
-# Replace example here
+# Replace this example if you like to choose another Boolean function as an example.
 from Examples import runningExample as example
 
 from construction_of_QDE_graph import construct_qde_graph
 from sign_algebra import *
-
-
 
 example_filename = "./Examples/"+example.return_name()
 
@@ -135,7 +139,15 @@ def computeQuotientGraph_fromPartition(graph, partition):
     result = nx.relabel_nodes(condensation, partition_as_dict)
     return result
 
-def spit_out_graphs(variable_to_boolean_function, prefix_of_filename, boolean_functions_as_list):
+def spit_out_graphs(variable_to_boolean_function, prefix_of_filename):
+    """
+    Plots the
+    1) interaction graph
+    2) asyncronous state transition graph
+    3) The quotient graph with respect to the partition induced by the Boolean function.
+    4) Qualitate and Boolean graph
+    5) SCCs of these graphs
+    """
     prime_implicants = QMC.functions2primes(variable_to_boolean_function)
 
     # Create the interaction graph
@@ -161,21 +173,18 @@ def spit_out_graphs(variable_to_boolean_function, prefix_of_filename, boolean_fu
     # Get the QDE graph and the discrete QDE graph. Both are constructed in exactley the same way but have
     # different node sets.
     qde_graph = construct_qde_graph(sign_matrix, zero_one_representation=False)
-    discrete_qde_graph = construct_qde_graph(sign_matrix, zero_one_representation=True)
+    boolean_qde_graph = construct_qde_graph(sign_matrix, zero_one_representation=True)
 
     STGs.stg2image(qde_graph, prefix_of_filename + "_complete_qde_graph.pdf", LayoutEngine="dot")
-    STGs.stg2image(discrete_qde_graph, prefix_of_filename + "_complete_discrete_qde_graph.pdf", LayoutEngine="dot")
+    STGs.stg2image(boolean_qde_graph, prefix_of_filename + "_complete_boolean_qde_graph.pdf", LayoutEngine="dot")
 
     # Get the scc-graph of the QDE-graph
-    sccs = nx.strongly_connected_components(discrete_qde_graph)
-    scc_qde_graph = computeQuotientGraph_fromPartition(discrete_qde_graph, sccs)
+    sccs = nx.strongly_connected_components(boolean_qde_graph)
+    scc_qde_graph = computeQuotientGraph_fromPartition(boolean_qde_graph, sccs)
     STGs.stg2image(scc_qde_graph, prefix_of_filename + "_complete_scc_qde_graph.pdf")
 
     STGs.stg2image(state_transition_graph, prefix_of_filename + "_stg.pdf", LayoutEngine="dot")
     IGs.create_image(prime_implicants, prefix_of_filename + "_igraph.pdf")
 
-
-
 if __name__ == "__main__":
-    spit_out_graphs(variable_to_boolean_function=example.funcs, prefix_of_filename=example_filename,
-                    boolean_functions_as_list=example.f)
+    spit_out_graphs(variable_to_boolean_function=example.funcs, prefix_of_filename=example_filename)
