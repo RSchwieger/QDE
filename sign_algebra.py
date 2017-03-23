@@ -155,6 +155,7 @@ class Vector:
 
     def __add__(self, other):
         return Vector([self[i]+other[i] for i in range(len(self))])
+
     def __eq__(self, other):
         for i in range(len(self.list_of_values)):
             if self.list_of_values[i] != other.list_of_values[i]:
@@ -178,7 +179,10 @@ class Vector:
 
 
 if __name__ == "__main__":
+    pass
+    """
     iter = product([NULL, PLUS, MINUS, Q], repeat=2)
     print(type(iter))
     for i in iter:
         print(i)
+    """

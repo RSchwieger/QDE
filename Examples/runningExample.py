@@ -11,7 +11,6 @@ def f4(x1, x2, x3, x4):
     return 1-x3
 
 def f(x):
-    print(x)
     return [f1(*x), f2(*x), f3(*x), f4(*x)]
 
 

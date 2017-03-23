@@ -75,41 +75,9 @@ def construct_qde_graph(sign_matrix, zero_one_representation=True):
     edges = get_edges(sign_matrix)
     for edge in edges:
         if zero_one_representation:
-            print(str(edge)+" ---> "+str((str(convert_edge(edge)[0]), str(convert_edge(edge)[1]))))
             edge = convert_edge(edge)
         qde_graph.add_edge(str(edge[0]), str(edge[1]))
     return qde_graph
 
-def save_plot_of_qde_graph(qde_graph, filename):
-    """
-    Saves the given qde graph to an png file in filename
-    :param qde_graph:
-    :param filename:
-    :return:
-    """
-    # node_labels = {node: node for node in qde_graph.nodes()}
-    nx.draw(qde_graph, pos=nx.spring_layout(qde_graph), node_size=2500, with_labels=True)
-    nx.drawing.nx_pydot.write_dot(qde_graph, filename.replace(".png", ".dot"))
-    #nx.write_dot(qde_graph, filename+'.dot')
-    #nx.draw_networkx_labels(qde_graph, pos=nx.spring_layout(qde_graph), labels=node_labels)
-    plt.draw()
-    plt.savefig(filename)
-    plt.close()
-
-def create_scc_graph(graph):
-    """
-    Create the graph of strongly connected components.
-    :param graph:
-    :return: scc graph
-    """
-    sccs = nx.strongly_connected_components(graph)
-    condensation = nx.condensation(graph, sccs)
-    return condensation, condensation.graph['mapping']
-
-
 if __name__ == "__main__":
-    sign_matrix = [[n, p, m], [m, n, m], [m, n, n]]
-    qde_graph = construct_qde_graph(sign_matrix)
-    scc_graph = create_scc_graph(qde_graph)
-    save_plot_of_qde_graph(qde_graph, "test.png")
-    save_plot_of_qde_graph(scc_graph, "test2.png")
+    pass
